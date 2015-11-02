@@ -38,4 +38,7 @@ See
 > $ ./src/shaderexample --help
 
 for usage instructions.
+
 # lr227 #
+
+main.cc changed background colour - 2/11/15
