@@ -3,18 +3,33 @@
 CubeAsset::CubeAsset() {
   // model coordinates, origin at centre.
   GLfloat vertex_buffer [] {
-    -0.5, -0.5, -0.5
-    , -0.5,  0.5, -0.5
-    ,  0.5, -0.5, -0.5
-    ,  0.5,  0.5, -0.5
+    -0.5, -0.5, -0.5 //0
+      , -0.5,  0.5, -0.5 //1
+      ,  0.5, -0.5, -0.5 //2
+      ,  0.5,  0.5, -0.5 //3
+      , -0.5, -0.5, 0.5 //4
+      , -0.5, 0.5, 0.5 //5
+      , 0.5, -0.5, 0.5 //6
+      , 0.5, 0.5, 0.5 //7
   };
 
-  element_buffer_length = 6;
-  GLuint element_buffer []  {
-    0, 1, 2
-    , 1, 3, 2
+  element_buffer_length = 36;
+   GLuint element_buffer []  {
+      0, 1, 2
+    , 2, 3, 0 //Side 0
+    , 0, 4, 5
+    , 5, 1, 0 //Side 1
+    , 5, 7, 6
+    , 6, 4, 5 //Side 2
+    , 3, 7, 6
+    , 6, 2, 3 //Side 3
+    , 1, 5, 7
+    , 7, 3, 1 //Side 4
+    , 0, 2, 6
+    , 6, 0, 4 //Side 5
   };
-
+      
+ 
   // Transfer buffers to the GPU
   //
 
@@ -23,7 +38,7 @@ CubeAsset::CubeAsset() {
 
   // immediately bind the buffer and transfer the data
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_token);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, vertex_buffer, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 24, vertex_buffer, GL_STATIC_DRAW);
 
   glGenBuffers(1, &element_buffer_token);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_token);
@@ -74,8 +89,15 @@ void CubeAsset::Draw(GLuint program_token) {
   GLuint position_attrib = glGetAttribLocation(program_token, "position");
   checkGLError();
 
+  GLuint model_uniform = glGetUniformLocation(program_token, "model");
+  checkGLError();
+
   glUseProgram(program_token);
   checkGLError();
+
+  glUniformMatrix4fv(model_uniform,1, false, glm::value_ptr(model_matrix));
+  rotateX(45.0f);
+  
 
   // use the previously transferred buffer as the vertex array.  This way
   // we transfer the buffer once -- at construction -- not on every frame.
@@ -103,4 +125,10 @@ void CubeAsset::Draw(GLuint program_token) {
   checkGLError();
 
   glDisableVertexAttribArray(position_attrib);
+}
+
+void CubeAsset:: rotateX(float angle) {
+  glm::vec3 unit_x_axis(1.0,0,0);
+  glm::mat4 id(1.0);
+  model_matrix = glm::rotate(id, 0.0f,  unit_x_axis); 
 }
